@@ -1,0 +1,100 @@
+Created 2017.02.18
+Last edited 2017.02.18
+
+1. Download the zip file of Marlin
+2. Download the latest arduino from arduino.cc and install in virtualbox (Cannot use platformio unfortunately)
+3. open /media/sf_VirtualBoxShares/PlatformIO/2016.11.17_CNC_Marlin/Marlin-1.0.2-2/Marlin/Marlin.ino #Not .pde
+4. In Configuration.h, change the following to these values:
+	a. #define MOTHERBOARD BOARD_RAMPS_14_EFB
+	b. #define HEATER_0_MINTEMP 0
+	c. #define HEATER_1_MINTEMP 0
+	d. #define HEATER_2_MINTEMP 0
+		#define HEATER_3_MINTEMP 0
+	e. #define BED_MINTEMP 0
+	f. #define BAUDRATE 250000 //More chance to fix errors, and apparently 250000 has less issues 
+	g. #define HEATER_0_MAXTEMP 500
+	h. #define HEATER_1_MAXTEMP 500
+	i. #define HEATER_2_MAXTEMP 500
+		#define HEATER_3_MAXTEMP 500
+	j. #define BED_MAXTEMP 500
+	k. #define EXTRUDE_MINTEMP 0
+	n. #define TEMP_SENSOR_0 1 //Must have this or it errors
+	o. #define TEMP_SENSOR_1 0
+		#define TEMP_SENSOR_2 0
+		#define TEMP_SENSOR_3 0
+		#define HOMING_FEEDRATE_XY 450 //Can go up to about 500 reliably on x and y, and 450 in z.  Max 600 x,y, and 500z.
+		#define HOMING_FEEDRATE_Z  450
+	q1. const bool X_MIN_ENDSTOP_INVERTING = false;
+	q2. const bool Y_MIN_ENDSTOP_INVERTING = false;
+	q3. const bool Z_MIN_ENDSTOP_INVERTING = false;
+	q4. const bool X_MAX_ENDSTOP_INVERTING = false;
+	q5. const bool Y_MAX_ENDSTOP_INVERTING = false;
+	q6. const bool Z_MAX_ENDSTOP_INVERTING = false;
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {141.73*8,141.73*8,141.73*8,760*1.1} //for 1/8 microstepping and 5/16" rods
+#define DEFAULT_MAX_FEEDRATE          {450/60, 450/60, 450/60, 25}    // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {100,100,100,10000}
+#define DEFAULT_ACCELERATION          20    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  20    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   20    // X, Y, Z acceleration for travel (non printing) moves
+#define INVERT_X_DIR true
+#define INVERT_Y_DIR true
+#define INVERT_Z_DIR true
+#define DEFAULT_XJERK                  0.4 // mm/s
+#define DEFAULT_YJERK                  0.4 // mm/s
+#define DEFAULT_ZJERK                  0.4 // mm/s
+5. In Configuration.h, change the following to these values for auto bed leveling: (NOT DONE)
+	a. uncomment "#define ENABLE_AUTO_BED_LEVELING" 
+    b1. #define LEFT_PROBE_BED_POSITION 100
+    b2. #define RIGHT_PROBE_BED_POSITION 200
+    b3. #define BACK_PROBE_BED_POSITION 300
+    b4. #define FRONT_PROBE_BED_POSITION 100
+	c1. #define X_PROBE_OFFSET_FROM_EXTRUDER 0 //I think this should be changed to non-zero (could be neg too), but whatever for now
+	c2. #define Y_PROBE_OFFSET_FROM_EXTRUDER 0
+	c3. #define Z_PROBE_OFFSET_FROM_EXTRUDER 0
+	d.  #define XY_TRAVEL_SPEED 450 
+
+
+
+5. In Arduino, change board to "Arduino/Genuino Mega or Mega 2560"
+6. Select usb port and upload (Note: if it times out while uploading, killall avrdude, and try again)
+6.5 The LED does not go off
+7. Download a cnc controller from https://github.com/pknoe3lh/cncgcodecontroller/releases
+7b. Run with a .sh file containing:
+#!/bin/sh
+java -jar CNC-GCode-Controller_libs.jar
+
+#---------------------------------------------------
+
+From https://www.youtube.com/watch?v=EcGFLwj0pnA&list=FL3OWdw1HSVIdt9IOcUgi-JA&index=2&t=608s, but didn't do because it's a diff type of sensor
+Comment out ENDSTOPPULLUP_ZMIN x2
+Z_HOME_DIR -1 
+Z_MIN_POS 0
+uncomment ENABLE_AUTO_BED_LEVELING
+#define AUTO_BED_LEVELING_GRID
+#define LEFT_PROBE_BED_POSITION XXX x4
+X_PROBE_OFFSET_FROM_EXTRUDER xxx x3
+
+#define ENDSTOPS_ONLY_FOR_HOMING
+
+
+#----
+#COULD NOT UPLOAD VIA AVRDUDE via this method.  IGNORE THE FOLLOWING:  Bootloader for the chip (not usb) was destroyed!  Bootloader code in a folder if you do it again.  Can use a nano to program the mega using the ISCP headers as per http://www.gammon.com.au/forum/?id=11635 .
+#NOTES: Compile in virtualbox.   Use sketch-> export compiled binary, then sketch->show sketch directory.  Use the following commands to get it to the pi and to the arduino:
+#  scp -o PreferredAuthentications=password ~/Other/VirtualBoxShares/PlatformIO/2016.11.17_CNC_Marlin/Marlin-1.0.2-2/Marlin/Marlin.ino.with_bootloader.mega.hex pi@octopi.local:/home/pi/Marlin.ino.with_bootloader.mega.hex
+# avrdude -p m2560 -c stk500v2 -P /dev/serial/by-id/usb-Arduino__www.arduino.cc__0042_55437333637351519032-if00 -b 115200 -F -U flash:w:/home/pi/Marlin.ino.with_bootloader.mega.hex
+#----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
